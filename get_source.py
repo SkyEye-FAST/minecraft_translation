@@ -1,29 +1,38 @@
 import os
-import re
 import sys
+import tomllib
 from requests import get
 from zipfile import ZipFile
-
-# 获取的版本
-V = "1.19.4"
-print(f"选择的版本：{V}\n")
 
 # 当前绝对路径
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
 
-# 版本文件夹
-os.makedirs(VERSION_FOLDER := os.path.join(P, "versions", V), exist_ok=True)
+# 加载配置
+with open(os.path.join(P, "configuration.toml"), "rb") as f:
+    config = tomllib.load(f)
+
+remove_client = config["remove_client"]
+lang_list = config["language_list"]
+
+# 获取的版本
+V = config["version"]
 
 # 定义获取JSON函数
 get_json = lambda url: get(url).json()
 
 # 获取version_manifest_v2.json
 version_manifest_url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-version_manifest = get_json(version_manifest_url)["versions"]
-print("正在获取版本清单“version_manifest_v2.json”……")
+version_manifest = get_json(version_manifest_url)
+print("正在获取版本清单“version_manifest_v2.json”……\n")
+# 获取最新版
+if V == "latest":
+    V = version_manifest["latest"]["snapshot"]
+    # 版本文件夹
+    os.makedirs(VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True)
+    print(f"选择的版本：{V}\n")
 
 # 获取client.json
-client_manifest_url = next((i["url"] for i in version_manifest if i["id"] == V), None)
+client_manifest_url = next((i["url"] for i in version_manifest["versions"] if i["id"] == V), None)
 if client_manifest_url:
     print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
     client_manifest = get_json(client_manifest_url)
@@ -60,20 +69,11 @@ with ZipFile(client_path) as client:
         print("无法找到English (US)的语言文件，跳过")
 
 # 删除客户端JAR
-print("正在删除client.jar……\n")
-os.remove(client_path)
+if remove_client:
+    print("正在删除client.jar……\n")
+    os.remove(client_path)
 
 # 获取语言文件
-lang_list = [
-    "zh_CN.lang",
-    "zh_TW.lang",
-    "zh_cn.lang",
-    "zh_tw.lang",
-    "zh_cn.json",
-    "zh_tw.json",
-    "zh_hk.json",
-    "lzh.json",
-]
 for e in lang_list:
     if ("minecraft/lang/" + e) in asset_index:
         hash = asset_index["minecraft/lang/" + e]["hash"]
