@@ -28,7 +28,7 @@ if client_manifest_url:
     print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
     client_manifest = get_json(client_manifest_url)
 else:
-    print("无法在版本清单中找到此版本，请检查填写的版本号是否正确。")
+    print("无法在版本清单中找到此版本，请检查填写的版本号是否正确")
     os.rmdir(VERSION_FOLDER)
     sys.exit()
 
@@ -43,15 +43,23 @@ print("正在下载客户端Java归档（client.jar）……")
 with open(client_path, "wb") as f:
     f.write(get(client_url).content)
 # 解压English (US)语言文件
-en_list = ["en_US.lang", "en_us.lang", "en_us.json"]
 with ZipFile(client_path) as client:
-    for e in en_list:
-        if ("assets/minecraft/lang/" + e) in client.namelist():
-            en = e
-    with client.open("assets/minecraft/lang/" + en) as content:
-        with open(os.path.join(VERSION_FOLDER, en), "wb") as f:
-            print(f"正在从client.jar解压语言文件“{en}”……")
-            f.write(content.read())
+    en = next(
+        (
+            e
+            for e in ["en_US.lang", "en_us.lang", "en_us.json"]
+            if ("assets/minecraft/lang/" + e) in client.namelist()
+        ),
+        None,
+    )
+    if en:
+        with client.open("assets/minecraft/lang/" + en) as content:
+            with open(os.path.join(VERSION_FOLDER, en), "wb") as f:
+                print(f"正在从client.jar解压语言文件“{en}”……")
+                f.write(content.read())
+    else:
+        print("无法找到English (US)的语言文件，跳过")
+
 # 删除客户端JAR
 print("正在删除client.jar……\n")
 os.remove(client_path)
