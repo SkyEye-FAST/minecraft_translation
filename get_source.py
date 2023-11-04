@@ -21,19 +21,23 @@ V = config["version"]
 get_json = lambda url: get(url).json()
 
 # 获取version_manifest_v2.json
-version_manifest_url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-version_manifest = get_json(version_manifest_url)
+version_manifest = get_json(
+    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+)
 print("正在获取版本清单“version_manifest_v2.json”……\n")
 # 获取最新版
 if V == "latest":
     V = version_manifest["latest"]["snapshot"]
     # 版本文件夹
-    os.makedirs(VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True)
+    os.makedirs(
+        VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True
+    )
     print(f"选择的版本：{V}\n")
 
 # 获取client.json
-client_manifest_url = next((i["url"] for i in version_manifest["versions"] if i["id"] == V), None)
-if client_manifest_url:
+if client_manifest_url := next(
+    (i["url"] for i in version_manifest["versions"] if i["id"] == V), None
+):
     print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
     client_manifest = get_json(client_manifest_url)
 else:
