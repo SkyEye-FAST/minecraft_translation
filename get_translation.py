@@ -1,3 +1,6 @@
+# -*- encoding: utf-8 -*-
+""" Minecraft翻译获取器 """
+
 import json
 import os
 
