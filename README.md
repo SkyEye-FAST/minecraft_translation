@@ -1,5 +1,7 @@
 # Minecraft翻译获取器
 
+[![Pylint](https://github.com/SkyEye-FAST/minecraft_translation/actions/workflows/pylint.yml/badge.svg)](https://github.com/SkyEye-FAST/minecraft_translation/actions/workflows/pylint.yml)
+
 此脚本用于从官方服务器获取Java版Minecraft的语言文件。
 
 获取到的语言文件默认存储在与脚本同级的`versions`文件夹下的对应版本文件夹中。
