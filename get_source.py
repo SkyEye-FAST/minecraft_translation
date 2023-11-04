@@ -1,8 +1,11 @@
+# -*- encoding: utf-8 -*-
+""" Minecraft语言文件获取器 """
+
 import os
 import sys
 import tomllib
-from requests import get
 from zipfile import ZipFile
+from requests import get
 
 # 当前绝对路径
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
@@ -17,8 +20,11 @@ lang_list = config["language_list"]
 # 获取的版本
 V = config["version"]
 
-# 定义获取JSON函数
-get_json = lambda url: get(url).json()
+
+def get_json(url: str):
+    """获取JSON"""
+    return get(url, timeout=60).json()
+
 
 # 获取version_manifest_v2.json
 version_manifest = get_json(
@@ -28,11 +34,12 @@ print("正在获取版本清单“version_manifest_v2.json”……\n")
 # 获取最新版
 if V == "latest":
     V = version_manifest["latest"]["snapshot"]
-    # 版本文件夹
-    os.makedirs(
-        VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True
-    )
-    print(f"选择的版本：{V}\n")
+
+print(f"选择的版本：{V}\n")
+# 版本文件夹
+os.makedirs(
+    VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True
+)
 
 # 获取client.json
 if client_manifest_url := next(
@@ -54,14 +61,14 @@ client_url = client_manifest["downloads"]["client"]["url"]
 client_path = os.path.join(VERSION_FOLDER, "client.jar")
 print("正在下载客户端Java归档（client.jar）……")
 with open(client_path, "wb") as f:
-    f.write(get(client_url).content)
+    f.write(get(client_url, timeout=120).content)
 # 解压English (US)语言文件
 with ZipFile(client_path) as client:
     if en := next(
         (
             e
             for e in ["en_US.lang", "en_us.lang", "en_us.json"]
-            if ("assets/minecraft/lang/" + e) in client.namelist()
+            if "assets/minecraft/lang/" + e in client.namelist()
         ),
         None,
     ):
@@ -79,12 +86,17 @@ if remove_client:
 
 # 获取语言文件
 for e in lang_list:
-    if ("minecraft/lang/" + e) in asset_index:
-        hash = asset_index["minecraft/lang/" + e]["hash"]
-        print(f"正在下载语言文件“{e}”（{hash}）……")
-        asset_url = "https://resources.download.minecraft.net/" + hash[:2] + "/" + hash
+    if "minecraft/lang/" + e in asset_index:
+        file_hash = asset_index["minecraft/lang/" + e]["hash"]
+        print(f"正在下载语言文件“{e}”（{file_hash}）……")
+        asset_url = (
+            "https://resources.download.minecraft.net/"
+            + file_hash[:2]
+            + "/"
+            + file_hash
+        )
         lang_file_path = os.path.join(VERSION_FOLDER, e)
         with open(lang_file_path, "wb") as f:
-            f.write(get(asset_url).content)
+            f.write(get(asset_url, timeout=60).content)
 
 print("\n已完成")
