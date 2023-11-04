@@ -8,6 +8,12 @@
 
 由于使用了标准库`tomllib`，所以需要**Python >= 3.11**
 
+需要库`requests`，请使用下面的命令安装：
+
+``` shell
+pip install requests
+```
+
 ## 配置文件
 
 配置文件名为`configuration.toml`，位置与脚本同级。
