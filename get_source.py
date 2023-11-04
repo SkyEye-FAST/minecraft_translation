@@ -5,7 +5,7 @@ from requests import get
 from zipfile import ZipFile
 
 # 获取的版本
-V = "1.20.2"
+V = "1.19.4"
 print(f"选择的版本：{V}\n")
 
 # 当前绝对路径
@@ -44,15 +44,14 @@ with open(client_path, "wb") as f:
     f.write(get(client_url).content)
 # 解压English (US)语言文件
 with ZipFile(client_path) as client:
-    en = next(
+    if en := next(
         (
             e
             for e in ["en_US.lang", "en_us.lang", "en_us.json"]
             if ("assets/minecraft/lang/" + e) in client.namelist()
         ),
         None,
-    )
-    if en:
+    ):
         with client.open("assets/minecraft/lang/" + en) as content:
             with open(os.path.join(VERSION_FOLDER, en), "wb") as f:
                 print(f"正在从client.jar解压语言文件“{en}”……")
