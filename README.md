@@ -1,4 +1,4 @@
-# 音游猜曲名刮刮乐
+# Minecraft翻译获取器
 
 此脚本用于从官方服务器获取Java版Minecraft的语言文件。
 
