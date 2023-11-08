@@ -11,6 +11,9 @@ from requests import get
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
 
 # 加载配置
+if not os.path.exists(os.path.join(P, "configuration.toml")):
+    print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
+    sys.exit()
 with open(os.path.join(P, "configuration.toml"), "rb") as f:
     config = tomllib.load(f)
 
