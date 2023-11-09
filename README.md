@@ -2,9 +2,7 @@
 
 [![Pylint](https://github.com/SkyEye-FAST/minecraft_translation/actions/workflows/pylint.yml/badge.svg)](https://github.com/SkyEye-FAST/minecraft_translation/actions/workflows/pylint.yml)
 
-此脚本用于从官方服务器获取Java版Minecraft的语言文件。
-
-获取到的语言文件默认存储在与脚本同级的`versions`文件夹下的对应版本文件夹中。
+此项目用于查询Java版Minecraft的翻译。
 
 ## 需求
 
@@ -15,6 +13,22 @@
 ``` shell
 pip install requests
 ```
+
+## 脚本使用
+
+### 获取源文件
+
+`get_source.py`用于从官方服务器获取Java版Minecraft的语言文件。
+
+获取到的语言文件默认存储在与脚本同级的`versions`文件夹下的对应版本文件夹中。
+
+### 查询翻译
+
+`get_translation.py`用于从语言文件中查询翻译，有以下三种方式：
+
+1. 本地化键名
+2. 源字符串
+3. 源字符串（模糊匹配）
 
 ## 配置文件
 
