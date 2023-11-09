@@ -40,8 +40,8 @@ for file in language_files:
         language_data[file.split(".", maxsplit=1)[0]] = json.load(f)
 
 METHOD = 0
+print("选择查询方式：\n1. 本地化键名\n2. 源字符串\n3. 源字符串（模糊匹配）")
 while METHOD not in [1, 2, 3]:
-    print("选择查询方式：\n1. 本地化键名\n2. 源字符串\n3. 源字符串（模糊匹配）")
     METHOD = int(input("请输入编号："))
 
 if METHOD == 1:
