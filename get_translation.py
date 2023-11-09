@@ -47,7 +47,7 @@ while METHOD not in [1, 2, 3]:
 if METHOD == 1:
     translation_key = input("\n键名：")
 
-    if language_data["en_us"][translation_key]:
+    if translation_key in language_data["en_us"]:
         print(f"\n源字符串：{language_data['en_us'][translation_key]}")
         print(f"简体中文（中国大陆）：{language_data['zh_cn'][translation_key]}")
         print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'][translation_key]}")
