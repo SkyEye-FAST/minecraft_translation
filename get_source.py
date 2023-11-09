@@ -37,8 +37,8 @@ print("正在获取版本清单“version_manifest_v2.json”……\n")
 # 获取最新版
 if V == "latest":
     V = version_manifest["latest"]["snapshot"]
-
 print(f"选择的版本：{V}\n")
+
 # 版本文件夹
 os.makedirs(
     VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True
