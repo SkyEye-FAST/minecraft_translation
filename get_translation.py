@@ -49,10 +49,10 @@ if METHOD == 1:
 
     if translation_key in language_data["en_us"]:
         print(f"\n源字符串：{language_data['en_us'][translation_key]}")
-        print(f"简体中文（中国大陆）：{language_data['zh_cn'][translation_key]}")
-        print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'][translation_key]}")
-        print(f"繁體中文（台灣）：{language_data['zh_tw'][translation_key]}")
-        print(f"文言（華夏）：{language_data['lzh'][translation_key]}\n")
+        print(f"简体中文（中国大陆）：{language_data['zh_cn'].get(translation_key, '不存在')}")
+        print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'].get(translation_key, '不存在')}")
+        print(f"繁體中文（台灣）：{language_data['zh_tw'].get(translation_key, '不存在')}")
+        print(f"文言（華夏）：{language_data['lzh'].get(translation_key, '不存在')}\n")
     else:
         print("未找到对应的键名，请检查输入")
 elif METHOD == 2:
@@ -62,10 +62,10 @@ elif METHOD == 2:
     if query_keys:
         for key in query_keys:
             print(f"\n本地化键名：{key}")
-            print(f"简体中文（中国大陆）：{language_data['zh_cn'][key]}")
-            print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'][key]}")
-            print(f"繁體中文（台灣）：{language_data['zh_tw'][key]}")
-            print(f"文言（華夏）：{language_data['lzh'][key]}\n")
+            print(f"简体中文（中国大陆）：{language_data['zh_cn'].get(key, '不存在')}")
+            print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'].get(key, '不存在')}")
+            print(f"繁體中文（台灣）：{language_data['zh_tw'].get(key, '不存在')}")
+            print(f"文言（華夏）：{language_data['lzh'].get(key, '不存在')}\n")
     else:
         print("未找到对应的源字符串，请检查输入")
 elif METHOD == 3:
@@ -78,9 +78,9 @@ elif METHOD == 3:
         for key in query_keys:
             print(f"\n本地化键名：{key}")
             print(f"源字符串：{language_data['en_us'][key]}")
-            print(f"简体中文（中国大陆）：{language_data['zh_cn'][key]}")
-            print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'][key]}")
-            print(f"繁體中文（台灣）：{language_data['zh_tw'][key]}")
-            print(f"文言（華夏）：{language_data['lzh'][key]}\n")
+            print(f"简体中文（中国大陆）：{language_data['zh_cn'].get(key, '不存在')}")
+            print(f"繁體中文（香港特別行政區）：{language_data['zh_hk'].get(key, '不存在')}")
+            print(f"繁體中文（台灣）：{language_data['zh_tw'].get(key, '不存在')}")
+            print(f"文言（華夏）：{language_data['lzh'].get(key, '不存在')}\n")
     else:
         print("未找到对应的源字符串，请检查输入")
