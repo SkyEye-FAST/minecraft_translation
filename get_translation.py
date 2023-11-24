@@ -22,7 +22,7 @@ language_files_list = [
 ]
 language_data = {}
 for file in language_files_list:
-    with open(os.path.join(LANG_FOLDER, file), "rb") as f:
+    with open(os.path.join(LANG_FOLDER, file), "r", encoding="utf-8") as f:
         language_data[file.split(".", maxsplit=1)[0]] = json.load(f)
 
 METHOD = 0
@@ -41,7 +41,7 @@ if METHOD == 1:
             )
         print()
     else:
-        print("未找到对应的键名，请检查输入")
+        print("未找到对应的键名，请检查输入。")
 elif METHOD == 2:
     source_str = input("\n源字符串：")
 
@@ -53,7 +53,7 @@ elif METHOD == 2:
                 print(f"{language_dict[lang]}：{language_data[lang].get(key, '不存在')}")
             print()
     else:
-        print("未找到对应的源字符串，请检查输入")
+        print("未找到对应的源字符串，请检查输入。")
 elif METHOD == 3:
     source_str = input("\n源字符串的一部分（不区分大小写）：")
 
@@ -68,7 +68,7 @@ elif METHOD == 3:
                 print(f"{language_dict[lang]}：{language_data[lang].get(key, '不存在')}")
             print()
     else:
-        print("未找到对应的源字符串，请检查输入")
+        print("未找到对应的源字符串，请检查输入。")
 elif METHOD == 4:
     print("\n请选择语言：")
     for index, seq in enumerate(language_list):
@@ -90,4 +90,4 @@ elif METHOD == 4:
                 print(f"{language_dict[lang]}：{language_data[lang].get(key, '不存在')}")
             print()
     else:
-        print("未找到对应的翻译后字符串，请检查输入")
+        print("未找到对应的翻译后字符串，请检查输入。")

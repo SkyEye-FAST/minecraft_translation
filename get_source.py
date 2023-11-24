@@ -4,14 +4,20 @@
 import hashlib
 import os
 import sys
-from zipfile import ZipFile as z
+from zipfile import ZipFile
 import requests as r
 from base import config, V, version_manifest_json, LANG_FOLDER
 
 
 def get_json(url: str):
     """获取JSON"""
-    return r.get(url, timeout=60).json()
+    try:
+        resp = r.get(url, timeout=60)
+        resp.raise_for_status()
+        return resp.json()
+    except r.exceptions.RequestException as ex:
+        print(f"请求发生错误: {ex}")
+        sys.exit()
 
 
 remove_client = config["remove_client"]
@@ -21,36 +27,47 @@ lang_list = config["language_list"]
 os.makedirs(LANG_FOLDER, exist_ok=True)
 
 # 获取client.json
-if client_manifest_url := next(
+client_manifest_url = next(
     (i["url"] for i in version_manifest_json["versions"] if i["id"] == V), None
-):
-    print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
-    client_manifest = get_json(client_manifest_url)
-else:
+)
+if not client_manifest_url:
     print("无法在版本清单中找到此版本，请检查填写的版本号是否正确")
     os.rmdir(LANG_FOLDER)
     sys.exit()
+
+print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
+client_manifest = get_json(client_manifest_url)
 
 # 获取资产索引文件
 asset_index_url = client_manifest["assetIndex"]["url"]
 print(f"正在获取资产索引文件“{asset_index_url.rsplit('/', 1)[-1]}”……\n")
 asset_index = get_json(asset_index_url)["objects"]
+
 # 获取客户端JAR
 client_url = client_manifest["downloads"]["client"]["url"]
 client_path = os.path.join(LANG_FOLDER, "client.jar")
 print("正在下载客户端Java归档（client.jar）……")
-with open(client_path, "wb") as f:
-    f.write(r.get(client_url, timeout=120).content)
+try:
+    response = r.get(client_url, timeout=120)
+    response.raise_for_status()
+    with open(client_path, "wb") as f:
+        f.write(response.content)
+except r.exceptions.RequestException as e:
+    print(f"请求发生错误: {e}")
+    os.remove(client_path)
+    sys.exit()
+
 # 解压English (US)语言文件
-with z(client_path) as client:
-    if en := next(
+with ZipFile(client_path) as client:
+    en = next(
         (
             e
             for e in ["en_US.lang", "en_us.lang", "en_us.json"]
             if "assets/minecraft/lang/" + e in client.namelist()
         ),
         None,
-    ):
+    )
+    if en:
         with client.open("assets/minecraft/lang/" + en) as content:
             with open(os.path.join(LANG_FOLDER, en), "wb") as f:
                 print(f"正在从client.jar解压语言文件“{en}”……")
@@ -75,11 +92,15 @@ for e in lang_list:
             + file_hash
         )
         lang_file_path = os.path.join(LANG_FOLDER, e)
-        with open(lang_file_path, "wb") as f:
-            f.write(r.get(asset_url, timeout=60).content)
-        with open(lang_file_path, "rb") as f:
-            digest = hashlib.file_digest(f, "sha1")
-            if digest.hexdigest() == file_hash:
-                print("文件SHA1校验一致。\n")
+        try:
+            response = r.get(asset_url, timeout=60)
+            response.raise_for_status()
+            with open(lang_file_path, "wb") as f:
+                f.write(response.content)
+            with open(lang_file_path, "rb") as f:
+                if hashlib.file_digest(f, "sha1").hexdigest() == file_hash:
+                    print("文件SHA1校验一致。\n")
+        except r.exceptions.RequestException as e:
+            print(f"请求发生错误: {e}")
 
 print("\n已完成。")
