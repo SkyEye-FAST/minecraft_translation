@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 """Minecraft语言文件获取器"""
 
+import hashlib
 import os
 import sys
 from zipfile import ZipFile as z
@@ -76,5 +77,9 @@ for e in lang_list:
         lang_file_path = os.path.join(LANG_FOLDER, e)
         with open(lang_file_path, "wb") as f:
             f.write(r.get(asset_url, timeout=60).content)
+        with open(lang_file_path, "rb") as f:
+            digest = hashlib.file_digest(f, "sha1")
+            if digest.hexdigest() == file_hash:
+                print("文件SHA1校验一致。\n")
 
-print("\n已完成")
+print("\n已完成。")
