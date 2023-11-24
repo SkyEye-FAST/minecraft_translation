@@ -11,10 +11,11 @@ import requests as r
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
 
 # 加载配置
-if not os.path.exists(os.path.join(P, "configuration.toml")):
+config_path = os.path.join(P, "configuration.toml")
+if not os.path.exists(config_path):
     print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
     sys.exit()
-with open(os.path.join(P, "configuration.toml"), "rb") as f:
+with open(config_path, "rb") as f:
     config = tl.load(f)
 
 remove_client = config["remove_client"]
