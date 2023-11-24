@@ -1,28 +1,11 @@
 # -*- encoding: utf-8 -*-
-""" Minecraft语言文件获取器 """
+"""Minecraft语言文件获取器"""
 
 import os
 import sys
 from zipfile import ZipFile as z
-import tomllib as tl
 import requests as r
-
-# 当前绝对路径
-P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
-
-# 加载配置
-config_path = os.path.join(P, "configuration.toml")
-if not os.path.exists(config_path):
-    print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
-    sys.exit()
-with open(config_path, "rb") as f:
-    config = tl.load(f)
-
-remove_client = config["remove_client"]
-lang_list = config["language_list"]
-
-# 获取的版本
-V = config["version"]
+from base import config, V, version_manifest_json, LANG_FOLDER
 
 
 def get_json(url: str):
@@ -30,42 +13,21 @@ def get_json(url: str):
     return r.get(url, timeout=60).json()
 
 
-# 获取version_manifest_v2.json
-try:
-    print("正在获取版本清单“version_manifest_v2.json”……\n")
-    version_manifest = r.get(
-        "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
-        timeout=60,
-    )
-    print("正在获取版本清单“version_manifest_v2.json”……\n")
-    with open(
-        os.path.join(
-            os.path.join(P, config["version_folder"]), "version_manifest_v2.json"
-        ),
-        "wb",
-    ) as f:
-        f.write(version_manifest.content)
-except r.exceptions.RequestException:
-    print("无法获取到版本清单，使用先前获取的版本清单。")
+remove_client = config["remove_client"]
+lang_list = config["language_list"]
 
-# 获取最新版
-V = version_manifest.json()["latest"]["snapshot"]
-print(f"选择的版本：{V}\n")
-
-# 版本文件夹
-os.makedirs(
-    VERSION_FOLDER := os.path.join(P, config["version_folder"], V), exist_ok=True
-)
+# 存放版本语言文件的文件夹
+os.makedirs(LANG_FOLDER, exist_ok=True)
 
 # 获取client.json
 if client_manifest_url := next(
-    (i["url"] for i in version_manifest.json()["versions"] if i["id"] == V), None
+    (i["url"] for i in version_manifest_json["versions"] if i["id"] == V), None
 ):
     print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
     client_manifest = get_json(client_manifest_url)
 else:
     print("无法在版本清单中找到此版本，请检查填写的版本号是否正确")
-    os.rmdir(VERSION_FOLDER)
+    os.rmdir(LANG_FOLDER)
     sys.exit()
 
 # 获取资产索引文件
@@ -74,7 +36,7 @@ print(f"正在获取资产索引文件“{asset_index_url.rsplit('/', 1)[-1]}”
 asset_index = get_json(asset_index_url)["objects"]
 # 获取客户端JAR
 client_url = client_manifest["downloads"]["client"]["url"]
-client_path = os.path.join(VERSION_FOLDER, "client.jar")
+client_path = os.path.join(LANG_FOLDER, "client.jar")
 print("正在下载客户端Java归档（client.jar）……")
 with open(client_path, "wb") as f:
     f.write(r.get(client_url, timeout=120).content)
@@ -89,7 +51,7 @@ with z(client_path) as client:
         None,
     ):
         with client.open("assets/minecraft/lang/" + en) as content:
-            with open(os.path.join(VERSION_FOLDER, en), "wb") as f:
+            with open(os.path.join(LANG_FOLDER, en), "wb") as f:
                 print(f"正在从client.jar解压语言文件“{en}”……")
                 f.write(content.read())
     else:
@@ -111,7 +73,7 @@ for e in lang_list:
             + "/"
             + file_hash
         )
-        lang_file_path = os.path.join(VERSION_FOLDER, e)
+        lang_file_path = os.path.join(LANG_FOLDER, e)
         with open(lang_file_path, "wb") as f:
             f.write(r.get(asset_url, timeout=60).content)
 

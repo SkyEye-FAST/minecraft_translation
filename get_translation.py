@@ -1,44 +1,9 @@
 # -*- encoding: utf-8 -*-
-""" Minecraft翻译获取器 """
+"""Minecraft翻译获取器"""
 
 import json
 import os
-import sys
-import tomllib as tl
-import requests as r
-
-# 当前绝对路径
-P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
-
-# 加载配置
-config_path = os.path.join(P, "configuration.toml")
-if not os.path.exists(config_path):
-    print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
-    sys.exit()
-with open(config_path, "rb") as f:
-    config = tl.load(f)
-
-VERSION_FOLDER = os.path.join(P, config["version_folder"])
-
-# 获取的版本
-V = config["version"]
-# 获取最新版
-if V == "latest":
-    try:
-        print("正在获取版本清单“version_manifest_v2.json”……\n")
-        version_manifest = r.get(
-            "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
-            timeout=60,
-        )
-        with open(os.path.join(VERSION_FOLDER, "version_manifest_v2.json"), "wb") as f:
-            f.write(version_manifest.content)
-        V = version_manifest.json()["latest"]["snapshot"]
-    except r.exceptions.RequestException:
-        print("无法获取到版本清单，使用先前获取的版本清单。")
-        with open(os.path.join(VERSION_FOLDER, "version_manifest_v2.json"), "rb") as f:
-            version_manifest = json.load(f)
-        V = version_manifest["latest"]["snapshot"]
-print(f"选择的版本：{V}\n")
+from base import LANG_FOLDER
 
 # 读取语言文件
 language_dict = {
@@ -57,7 +22,7 @@ language_files_list = [
 ]
 language_data = {}
 for file in language_files_list:
-    with open(os.path.join(P, config["version_folder"], V, file), "rb") as f:
+    with open(os.path.join(LANG_FOLDER, file), "rb") as f:
         language_data[file.split(".", maxsplit=1)[0]] = json.load(f)
 
 METHOD = 0
