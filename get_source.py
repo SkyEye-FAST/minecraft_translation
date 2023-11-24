@@ -3,9 +3,9 @@
 
 import os
 import sys
-import tomllib
-from zipfile import ZipFile
-from requests import get
+from zipfile import ZipFile as z
+import tomllib as tl
+import requests as r
 
 # 当前绝对路径
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
@@ -15,7 +15,7 @@ if not os.path.exists(os.path.join(P, "configuration.toml")):
     print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
     sys.exit()
 with open(os.path.join(P, "configuration.toml"), "rb") as f:
-    config = tomllib.load(f)
+    config = tl.load(f)
 
 remove_client = config["remove_client"]
 lang_list = config["language_list"]
@@ -26,17 +26,29 @@ V = config["version"]
 
 def get_json(url: str):
     """获取JSON"""
-    return get(url, timeout=60).json()
+    return r.get(url, timeout=60).json()
 
 
 # 获取version_manifest_v2.json
-version_manifest = get_json(
-    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-)
-print("正在获取版本清单“version_manifest_v2.json”……\n")
+try:
+    print("正在获取版本清单“version_manifest_v2.json”……\n")
+    version_manifest = r.get(
+        "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
+        timeout=60,
+    )
+    print("正在获取版本清单“version_manifest_v2.json”……\n")
+    with open(
+        os.path.join(
+            os.path.join(P, config["version_folder"]), "version_manifest_v2.json"
+        ),
+        "wb",
+    ) as f:
+        f.write(version_manifest.content)
+except r.exceptions.RequestException:
+    print("无法获取到版本清单，使用先前获取的版本清单。")
+
 # 获取最新版
-if V == "latest":
-    V = version_manifest["latest"]["snapshot"]
+V = version_manifest.json()["latest"]["snapshot"]
 print(f"选择的版本：{V}\n")
 
 # 版本文件夹
@@ -46,7 +58,7 @@ os.makedirs(
 
 # 获取client.json
 if client_manifest_url := next(
-    (i["url"] for i in version_manifest["versions"] if i["id"] == V), None
+    (i["url"] for i in version_manifest.json()["versions"] if i["id"] == V), None
 ):
     print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”……")
     client_manifest = get_json(client_manifest_url)
@@ -64,9 +76,9 @@ client_url = client_manifest["downloads"]["client"]["url"]
 client_path = os.path.join(VERSION_FOLDER, "client.jar")
 print("正在下载客户端Java归档（client.jar）……")
 with open(client_path, "wb") as f:
-    f.write(get(client_url, timeout=120).content)
+    f.write(r.get(client_url, timeout=120).content)
 # 解压English (US)语言文件
-with ZipFile(client_path) as client:
+with z(client_path) as client:
     if en := next(
         (
             e
@@ -100,6 +112,6 @@ for e in lang_list:
         )
         lang_file_path = os.path.join(VERSION_FOLDER, e)
         with open(lang_file_path, "wb") as f:
-            f.write(get(asset_url, timeout=60).content)
+            f.write(r.get(asset_url, timeout=60).content)
 
 print("\n已完成")

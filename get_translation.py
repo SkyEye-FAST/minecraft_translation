@@ -4,8 +4,8 @@
 import json
 import os
 import sys
-import tomllib
-from requests import get
+import tomllib as tl
+import requests as r
 
 # 当前绝对路径
 P = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
@@ -16,16 +16,28 @@ if not os.path.exists(config_path):
     print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
     sys.exit()
 with open(config_path, "rb") as f:
-    config = tomllib.load(f)
+    config = tl.load(f)
+
+VERSION_FOLDER = os.path.join(P, config["version_folder"])
 
 # 获取的版本
 V = config["version"]
 # 获取最新版
 if V == "latest":
-    print("正在获取版本清单“version_manifest_v2.json”……\n")
-    V = get(
-        "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json", timeout=60
-    ).json()["latest"]["snapshot"]
+    try:
+        print("正在获取版本清单“version_manifest_v2.json”……\n")
+        version_manifest = r.get(
+            "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
+            timeout=60,
+        )
+        with open(os.path.join(VERSION_FOLDER, "version_manifest_v2.json"), "wb") as f:
+            f.write(version_manifest.content)
+        V = version_manifest.json()["latest"]["snapshot"]
+    except r.exceptions.RequestException:
+        print("无法获取到版本清单，使用先前获取的版本清单。")
+        with open(os.path.join(VERSION_FOLDER, "version_manifest_v2.json"), "rb") as f:
+            version_manifest = json.load(f)
+        V = version_manifest["latest"]["snapshot"]
 print(f"选择的版本：{V}\n")
 
 # 读取语言文件
