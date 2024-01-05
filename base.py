@@ -11,19 +11,19 @@ import requests as r
 P = Path(__file__).resolve().parent
 
 # 加载配置
-config_path = P / "configuration.toml"
-if not config_path.exists:
+CONFIG_DIR = P / "configuration.toml"
+if not CONFIG_DIR.exists:
     print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
     sys.exit()
-with open(config_path, "rb") as f:
+with open(CONFIG_DIR, "rb") as f:
     config = tl.load(f)
 
 # 获取的版本
 V = config["version"]
-VERSION_FOLDER = P / config["version_folder"]
+VERSION_DIR = P / config["version_folder"]
 
 # 获取version_manifest_v2.json
-version_manifest_path = VERSION_FOLDER / "version_manifest_v2.json"
+version_manifest_path = VERSION_DIR / "version_manifest_v2.json"
 try:
     print("正在获取版本清单“version_manifest_v2.json”……\n")
     version_manifest = r.get(
@@ -44,12 +44,8 @@ except r.exceptions.RequestException as e:
         print("请检查网络连接或手动提供有效的版本清单文件。")
         sys.exit()
 
-# 获取的版本
-V = config["version"]
-VERSION_FOLDER = P / config["version_folder"]
-
 # 获取最新版
 if V == "latest":
     V = version_manifest_json["latest"]["snapshot"]
-LANG_FOLDER = VERSION_FOLDER / V
+LANG_DIR = VERSION_DIR / V
 print(f"选择的版本：{V}\n")
