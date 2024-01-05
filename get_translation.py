@@ -2,7 +2,6 @@
 """Minecraft翻译获取器"""
 
 import json
-import os
 from base import LANG_FOLDER
 
 # 读取语言文件
@@ -22,7 +21,7 @@ language_files_list = [
 ]
 language_data = {}
 for file in language_files_list:
-    with open(os.path.join(LANG_FOLDER, file), "r", encoding="utf-8") as f:
+    with open(LANG_FOLDER / file, "r", encoding="utf-8") as f:
         language_data[file.split(".", maxsplit=1)[0]] = json.load(f)
 
 METHOD = 0
