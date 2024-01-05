@@ -12,7 +12,7 @@ P = Path(__file__).resolve().parent
 
 # 加载配置
 CONFIG_DIR = P / "configuration.toml"
-if not CONFIG_DIR.exists:
+if not CONFIG_DIR.exists():
     print("\n无法找到配置文件，请将配置文件放置在与此脚本同级的目录下。")
     sys.exit()
 with open(CONFIG_DIR, "rb") as f:
@@ -35,7 +35,7 @@ try:
     with open(version_manifest_path, "wb") as f:
         f.write(version_manifest.content)
 except r.exceptions.RequestException as e:
-    if version_manifest_path.exists:
+    if version_manifest_path.exists():
         print("无法获取版本清单，使用先前获取的版本清单。\n")
         with open(version_manifest_path, "r", encoding="utf-8") as f:
             version_manifest_json = json.load(f)
