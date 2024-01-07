@@ -21,7 +21,7 @@ language_files_list = [
 ]
 language_data = {}
 for file in language_files_list:
-    with open(LANG_FOLDER / file, "r", encoding="utf-8") as f:
+    with open(LANG_DIR / file, "r", encoding="utf-8") as f:
         language_data[file.split(".", maxsplit=1)[0]] = json.load(f)
 
 METHOD = 0
