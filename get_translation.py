@@ -2,7 +2,7 @@
 """Minecraft翻译获取器"""
 
 import json
-from base import LANG_FOLDER
+from base import LANG_DIR
 
 # 读取语言文件
 language_dict = {
