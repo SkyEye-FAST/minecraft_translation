@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""Minecraft翻译获取器"""
+"""Minecraft翻译查询器"""
 
 import json
 from base import LANG_DIR

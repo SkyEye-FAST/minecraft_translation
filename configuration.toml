@@ -15,3 +15,5 @@ language_list = [
 ]
 # 是否删除下载的client.jar
 remove_client = true
+# 输出文件夹
+output_folder = "output"

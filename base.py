@@ -21,6 +21,7 @@ with open(CONFIG_DIR, "rb") as f:
 # 获取的版本
 V = config["version"]
 VERSION_DIR = P / config["version_folder"]
+OUTPUT_DIR = P / config["output_folder"]
 
 # 获取version_manifest_v2.json
 version_manifest_path = VERSION_DIR / "version_manifest_v2.json"
