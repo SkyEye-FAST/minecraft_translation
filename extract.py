@@ -60,8 +60,8 @@ output_key_data = [k for k in language_data["en_us"].keys() if is_valid_key(k)]
 for lang_name in language_list:
     with open(OUTPUT_DIR / f"{lang_name}.txt", "w", encoding="utf-8") as f:
         for line in output_data[lang_name]:
-            f.write(line + "\n")
+            f.writelines(line + "\n")
 
 with open(OUTPUT_DIR / "key.txt", "w", encoding="utf-8") as f:
     for line in output_key_data:
-        f.write(line + "\n")
+        f.writelines(line + "\n")
