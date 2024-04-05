@@ -2,7 +2,8 @@
 """Minecraft译名提取器"""
 
 import re
-from base import OUTPUT_DIR, lang_list, language_data
+from base import OUTPUT_DIR, lang_list
+from init import language_data
 
 
 def is_valid_key(translation_key: str):

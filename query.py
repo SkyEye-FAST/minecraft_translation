@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 """Minecraft翻译查询器"""
 
-from base import lang_list, language_data
+from base import lang_list
+from init import language_data
 
 # 读取语言文件
 language_names = {
