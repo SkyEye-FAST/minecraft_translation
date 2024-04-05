@@ -19,7 +19,7 @@ def get_response(url: str):
         sys.exit()
 
 
-def get_file(url: str, file_path: str, sha1: str):
+def get_file(url: str, file_name: str, file_path: str, sha1: str):
     """下载文件"""
     for _ in range(3):
         with open(file_path, "wb") as f:
@@ -35,7 +35,7 @@ def get_file(url: str, file_path: str, sha1: str):
                 break
             print("文件SHA1校验不一致，重新尝试下载。\n")
     else:
-        print(f"无法下载文件“{lang}”。\n")
+        print(f"无法下载文件“{file_name}”。\n")
 
 
 # 存放版本语言文件的文件夹
@@ -56,9 +56,9 @@ client_url = client_manifest["downloads"]["client"]["url"]
 client_sha1 = client_manifest["downloads"]["client"]["sha1"]
 client_path = LANG_DIR / "client.jar"
 print(f"正在下载客户端Java归档“client.jar”（{client_sha1}）……")
-get_file(client_url, client_path, client_sha1)
+get_file(client_url, "client.jar", client_path, client_sha1)
 
-# 解压English (US)语言文件
+# 解压English (United States)语言文件
 with ZipFile(client_path) as client:
     with client.open("assets/minecraft/lang/en_us.json") as content:
         with open(LANG_DIR / "en_us.json", "wb") as en:
@@ -81,6 +81,7 @@ for lang in language_files_list:
         print(f"正在下载语言文件“{lang}”（{file_hash}）……")
         get_file(
             f"https://resources.download.minecraft.net/{file_hash[:2]}/{file_hash}",
+            lang,
             LANG_DIR / lang,
             file_hash,
         )
