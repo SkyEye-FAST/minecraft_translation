@@ -4,6 +4,7 @@
 import json
 import sys
 import tomllib as tl
+from datetime import datetime
 from pathlib import Path
 import requests as r
 
@@ -49,11 +50,23 @@ except r.exceptions.RequestException as e:
         print("请检查网络连接或手动提供有效的版本清单文件。")
         sys.exit()
 
-# 获取最新版
+# 检查最新版
 if V == "latest":
     V = version_manifest_json["latest"]["snapshot"]
 LANG_DIR = VERSION_DIR / V
 print(f"选择的版本：{V}\n")
+
+# 判断是否在18w02a及以后
+time_18w02a = datetime.fromisoformat("2018-01-10T11:54:55+00:00")
+time_chosen_ver = datetime.fromisoformat(
+    next(
+        (_["releaseTime"] for _ in version_manifest_json["versions"] if _["id"] == V),
+        None,
+    )
+)
+if time_18w02a > time_chosen_ver:
+    print("选择的版本使用.lang格式存储语言文件，请选择一个18w02a及以后的版本。")
+    sys.exit()
 
 # 检查是否有语言文件缺失
 missing_files = []

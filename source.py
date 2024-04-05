@@ -24,7 +24,7 @@ LANG_DIR.mkdir(exist_ok=True)
 
 # 获取client.json
 client_manifest_url = next(
-    (i["url"] for i in version_manifest_json["versions"] if i["id"] == V), None
+    (_["url"] for _ in version_manifest_json["versions"] if _["id"] == V), None
 )
 if not client_manifest_url:
     print("无法在版本清单中找到此版本，请检查填写的版本号是否正确。")
