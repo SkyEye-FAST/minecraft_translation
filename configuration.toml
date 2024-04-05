@@ -2,17 +2,8 @@
 version = "latest"
 # 版本文件夹
 version_folder = "versions"
-# 语言文件列表
-language_list = [
-    "zh_CN.lang",
-    "zh_TW.lang",
-    "zh_cn.lang",
-    "zh_tw.lang",
-    "zh_cn.json",
-    "zh_tw.json",
-    "zh_hk.json",
-    "lzh.json",
-]
+# 语言列表
+language_list = ["en_us", "zh_cn", "zh_hk", "zh_tw", "lzh", "ja_jp"]
 # 是否删除下载的client.jar
 remove_client = true
 # 输出文件夹

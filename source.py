@@ -5,7 +5,7 @@ import hashlib
 import sys
 from zipfile import ZipFile
 import requests as r
-from base import config, V, version_manifest_json, LANG_DIR
+from base import V, version_manifest_json, LANG_DIR, remove_client, lang_list
 
 
 def get_json(url: str):
@@ -19,9 +19,6 @@ def get_json(url: str):
         sys.exit()
 
 
-remove_client = config["remove_client"]
-lang_list = config["language_list"]
-
 # 存放版本语言文件的文件夹
 LANG_DIR.mkdir(exist_ok=True)
 
@@ -30,7 +27,7 @@ client_manifest_url = next(
     (i["url"] for i in version_manifest_json["versions"] if i["id"] == V), None
 )
 if not client_manifest_url:
-    print("无法在版本清单中找到此版本，请检查填写的版本号是否正确")
+    print("无法在版本清单中找到此版本，请检查填写的版本号是否正确。")
     LANG_DIR.rmdir()
     sys.exit()
 
@@ -58,21 +55,10 @@ except r.exceptions.RequestException as e:
 
 # 解压English (US)语言文件
 with ZipFile(client_path) as client:
-    en = next(
-        (
-            e
-            for e in ["en_US.lang", "en_us.lang", "en_us.json"]
-            if "assets/minecraft/lang/" + e in client.namelist()
-        ),
-        None,
-    )
-    if en:
-        with client.open("assets/minecraft/lang/" + en) as content:
-            with open(LANG_DIR / en, "wb") as f:
-                print(f"正在从client.jar解压语言文件“{en}”……")
-                f.write(content.read())
-    else:
-        print("无法找到English (US)的语言文件，跳过")
+    with client.open("assets/minecraft/lang/en_us.json") as content:
+        with open(LANG_DIR / "en_us.json", "wb") as f:
+            print("正在从client.jar解压语言文件“en_us.json”……")
+            f.write(content.read())
 
 # 删除客户端JAR
 if remove_client:
@@ -80,26 +66,36 @@ if remove_client:
     client_path.unlink()
 
 # 获取语言文件
-for e in lang_list:
-    if "minecraft/lang/" + e in asset_index:
-        file_hash = asset_index["minecraft/lang/" + e]["hash"]
-        print(f"正在下载语言文件“{e}”（{file_hash}）……")
-        asset_url = (
-            "https://resources.download.minecraft.net/"
-            + file_hash[:2]
-            + "/"
-            + file_hash
-        )
-        lang_file_path = LANG_DIR / e
-        try:
-            response = r.get(asset_url, timeout=60)
-            response.raise_for_status()
-            with open(lang_file_path, "wb") as f:
-                f.write(response.content)
-            with open(lang_file_path, "rb") as f:
-                if hashlib.file_digest(f, "sha1").hexdigest() == file_hash:
-                    print("文件SHA1校验一致。\n")
-        except r.exceptions.RequestException as e:
-            print(f"请求发生错误: {e}")
+MAX_RETRIES = 3  # 最大重试次数
+lang_list.remove("en_us")
+language_files_list = [f"{_}.json" for _ in lang_list]
 
-print("\n已完成。")
+for lang in language_files_list:
+    lang_asset = asset_index.get(f"minecraft/lang/{lang}")
+    if lang_asset:
+        file_hash = lang_asset["hash"]
+        print(f"正在下载语言文件“{lang}”（{file_hash}）……")
+        asset_url = (
+            f"https://resources.download.minecraft.net/{file_hash[:2]}/{file_hash}"
+        )
+        lang_file_path = LANG_DIR / lang
+
+        for _ in range(MAX_RETRIES):
+            try:
+                response = r.get(asset_url, timeout=60)
+                response.raise_for_status()
+                with open(lang_file_path, "wb") as f:
+                    f.write(response.content)
+                with open(lang_file_path, "rb") as f:
+                    if hashlib.file_digest(f, "sha1").hexdigest() == file_hash:
+                        print("文件SHA1校验一致。\n")
+                        break
+                    print("文件SHA1校验不一致，重新尝试下载。\n")
+            except r.exceptions.RequestException as e:
+                print(f"请求发生错误: {e}")
+        else:
+            print(f"无法下载语言文件“{lang}”。\n")
+    else:
+        print(f"{lang}不存在。\n")
+
+print("已完成。")

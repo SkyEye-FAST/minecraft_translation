@@ -22,6 +22,10 @@ with open(CONFIG_DIR, "rb") as f:
 V = config["version"]
 VERSION_DIR = P / config["version_folder"]
 OUTPUT_DIR = P / config["output_folder"]
+remove_client = config["remove_client"]
+lang_list = config["language_list"]
+
+VERSION_DIR.mkdir(exist_ok=True)
 
 # 获取version_manifest_v2.json
 version_manifest_path = VERSION_DIR / "version_manifest_v2.json"

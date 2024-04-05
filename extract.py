@@ -3,7 +3,8 @@
 
 import re
 import json
-from base import LANG_DIR, OUTPUT_DIR
+import sys
+from base import LANG_DIR, OUTPUT_DIR, lang_list
 
 
 def is_valid_key(translation_key: str):
@@ -33,17 +34,22 @@ def is_valid_key(translation_key: str):
 
     return False
 
+# 检查是否有语言文件缺失
+missing_files = []
+for lang_code in lang_list:
+    lang_file = LANG_DIR / f"{lang_code}.json"
+    if not lang_file.exists():
+        missing_files.append(f"{lang_code}.json")
+if missing_files:
+    print("以下语言文件不存在：")
+    for file_name in missing_files:
+        print(file_name)
+    print("请补全语言文件后重新尝试。")
+    sys.exit()
 
 # 读取语言文件
-language_list = [
-    "en_us",
-    "zh_cn",
-    "zh_hk",
-    "zh_tw",
-    "lzh",
-]
 language_data = {}
-for lang_name in language_list:
+for lang_name in lang_list:
     with open(LANG_DIR / f"{lang_name}.json", "r", encoding="utf-8") as f:
         language_data[lang_name] = json.load(f)
 
@@ -57,7 +63,7 @@ output_data = {
 
 output_key_data = [k for k in language_data["en_us"].keys() if is_valid_key(k)]
 
-for lang_name in language_list:
+for lang_name in lang_list:
     with open(OUTPUT_DIR / f"{lang_name}.txt", "w", encoding="utf-8") as f:
         for line in output_data[lang_name]:
             f.writelines(line + "\n")
