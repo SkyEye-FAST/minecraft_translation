@@ -2,9 +2,7 @@
 """Minecraft译名提取器"""
 
 import re
-import json
-import sys
-from base import LANG_DIR, OUTPUT_DIR, lang_list
+from base import OUTPUT_DIR, lang_list, language_data
 
 
 def is_valid_key(translation_key: str):
@@ -34,24 +32,6 @@ def is_valid_key(translation_key: str):
 
     return False
 
-# 检查是否有语言文件缺失
-missing_files = []
-for lang_code in lang_list:
-    lang_file = LANG_DIR / f"{lang_code}.json"
-    if not lang_file.exists():
-        missing_files.append(f"{lang_code}.json")
-if missing_files:
-    print("以下语言文件不存在：")
-    for file_name in missing_files:
-        print(file_name)
-    print("请补全语言文件后重新尝试。")
-    sys.exit()
-
-# 读取语言文件
-language_data = {}
-for lang_name in lang_list:
-    with open(LANG_DIR / f"{lang_name}.json", "r", encoding="utf-8") as f:
-        language_data[lang_name] = json.load(f)
 
 # 输出文件夹
 OUTPUT_DIR.mkdir(exist_ok=True)

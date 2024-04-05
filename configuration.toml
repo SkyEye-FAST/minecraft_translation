@@ -1,14 +1,14 @@
-# 获取的版本，若为latest则获取最新快照
-version = "latest"
+# 获取的版本，若为latest则获取最新版本
+version = "1.13"
 # 版本文件夹
 version_folder = "versions"
 # 语言列表
 language_list = [
     "en_us",
     "zh_cn",
-    "zh_hk",
+#    "zh_hk",
     "zh_tw",
-    "lzh",
+#    "lzh",
     "ja_jp",
     "ko_kr",
     "vi_vn",
