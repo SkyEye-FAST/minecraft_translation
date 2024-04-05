@@ -7,12 +7,14 @@ from base import LANG_DIR, lang_list
 
 # 读取语言文件
 language_names = {
-    "en_us": "源字符串，English (US)",
-    "zh_cn": "简体中文（中国大陆）",
-    "zh_hk": "繁體中文（香港特別行政區）",
-    "zh_tw": "繁體中文（台灣）",
-    "lzh": "文言（華夏）",
-    "ja_jp": "日本語（日本）",
+    "en_us": "源字符串，English (United States)",
+    "zh_cn": "简体中文 (中国大陆)",
+    "zh_hk": "繁體中文 (香港特別行政區)",
+    "zh_tw": "繁體中文 (台灣)",
+    "lzh": "文言 (華夏)",
+    "ja_jp": "日本語 (日本)",
+    "ko_kr": "한국어 (대한민국)",
+    "vi_vn": "Tiếng Việt (Việt Nam)",
 }
 
 # 检查是否有语言文件缺失
@@ -54,7 +56,7 @@ if METHOD == 1:
     else:
         print("未找到对应的键名，请检查输入。")
 elif METHOD == 2:
-    source_str = input("\n源字符串，English (US)：")
+    source_str = input("\n源字符串，English (United States)：")
     lang_list.remove("en_us")
 
     query_keys = [k for k, v in language_data["en_us"].items() if v == source_str]

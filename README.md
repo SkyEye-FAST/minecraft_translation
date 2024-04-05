@@ -22,6 +22,17 @@ pip install requests
 
 `source.py`用于从官方服务器获取Java版Minecraft的语言文件。
 
+默认获取以下语言的语言文件：
+
+- `en_us`: English (United States)
+- `zh_cn`: 简体中文 (中国大陆)
+- `zh_hk`: 繁體中文 (香港特別行政區)
+- `zh_tw`: 繁體中文 (台灣)
+- `lzh`: 文言 (華夏)
+- `ja_jp`: 日本語 (日本)
+- `ko_kr`: 한국어 (대한민국)
+- `vi_vn`: Tiếng Việt (Việt Nam)
+
 获取到的语言文件默认存储在与脚本同级的`versions`文件夹下的对应版本文件夹中。
 
 ### 查询翻译
