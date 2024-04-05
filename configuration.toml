@@ -1,5 +1,5 @@
 # 获取的版本，若为latest则获取最新版本
-version = "1.13"
+version = "latest"
 # 版本文件夹
 version_folder = "versions"
 # 语言列表

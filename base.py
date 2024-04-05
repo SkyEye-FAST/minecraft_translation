@@ -65,7 +65,7 @@ if missing_files:
     print("以下语言文件不存在：")
     for file_name in missing_files:
         print(file_name)
-    print("请补全语言文件后重新尝试。")
+    print("请补全语言文件或取消选择某些语言后重新尝试。")
     sys.exit()
 
 # 读取语言文件
