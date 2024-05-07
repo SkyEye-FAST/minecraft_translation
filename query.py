@@ -5,7 +5,7 @@ from base import lang_list
 from init import language_data
 
 # 读取语言文件
-language_names = {
+language_names: dict[str, str] = {
     "en_us": "源字符串，English (United States)",
     "zh_cn": "简体中文 (中国大陆)",
     "zh_hk": "繁體中文 (香港特別行政區)",
@@ -16,7 +16,7 @@ language_names = {
     "vi_vn": "Tiếng Việt (Việt Nam)",
 }
 
-METHOD = 0
+METHOD: int = 0
 print(
     "选择查询方式：\n1. 本地化键名\n2. 源字符串\n3. 源字符串（模糊匹配）\n4. 翻译后字符串（模糊匹配）"
 )
@@ -68,7 +68,7 @@ elif METHOD == 3:
         print("未找到对应的源字符串，请检查输入。")
 elif METHOD == 4:
     print("\n请选择语言：")
-    language_list = lang_list.copy().remove("en_us")
+    language_list: list[str] = lang_list.copy().remove("en_us")
     language_list.remove("en_us")
     for index, seq in enumerate(language_list):
         print(f"{index + 1}. {seq}：{language_names[seq]}")
@@ -78,7 +78,7 @@ elif METHOD == 4:
     chosen_language = language_list[LANGUAGE_NUM - 1]
     translation = input("\n翻译后字符串的一部分：")
 
-    query_keys = [
+    query_keys: list[str] = [
         k for k, v in language_data[chosen_language].items() if translation in v
     ]
     if query_keys:

@@ -23,8 +23,8 @@ with open(CONFIG_DIR, "rb") as f:
 V = config["version"]
 VERSION_DIR = P / config["version_folder"]
 OUTPUT_DIR = P / config["output_folder"]
-remove_client = config["remove_client"]
-lang_list = config["language_list"]
+remove_client: bool = config["remove_client"]
+lang_list: list[str] = config["language_list"]
 
 # 版本文件夹
 VERSION_DIR.mkdir(exist_ok=True)
@@ -54,8 +54,8 @@ except r.exceptions.RequestException as e:
 # 检查版本是否存在
 if V == "latest":
     V = version_manifest_json["latest"]["snapshot"]
-version_info = next(
-    (_ for _ in version_manifest_json["versions"] if _["id"] == V), None
+version_info: dict = next(
+    (_ for _ in version_manifest_json["versions"] if _["id"] == V), {}
 )
 if not version_info:
     print("无法在版本清单中找到此版本，请检查填写的版本号是否正确。")

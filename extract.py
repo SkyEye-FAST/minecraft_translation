@@ -2,6 +2,7 @@
 """Minecraft译名提取器"""
 
 import re
+
 from base import OUTPUT_DIR, lang_list
 from init import language_data
 
@@ -37,12 +38,14 @@ def is_valid_key(translation_key: str):
 # 输出文件夹
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-output_data = {
+output_data: dict[str, list[str]] = {
     name: [v for k, v in data.items() if is_valid_key(k)]
     for name, data in language_data.items()
 }
 
-output_key_data = [k for k in language_data["en_us"].keys() if is_valid_key(k)]
+output_key_data: list[str] = [
+    k for k in language_data["en_us"].keys() if is_valid_key(k)
+]
 
 for lang_name in lang_list:
     with open(OUTPUT_DIR / f"{lang_name}.txt", "w", encoding="utf-8") as f:

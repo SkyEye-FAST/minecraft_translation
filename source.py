@@ -4,7 +4,10 @@
 import hashlib
 import sys
 from zipfile import ZipFile
+from pathlib import Path
+
 import requests as r
+
 from base import LANG_DIR, remove_client, lang_list, version_info
 
 
@@ -19,7 +22,7 @@ def get_response(url: str):
         sys.exit()
 
 
-def get_file(url: str, file_name: str, file_path: str, sha1: str):
+def get_file(url: str, file_name: str, file_path: Path, sha1: str):
     """下载文件"""
     for _ in range(3):
         with open(file_path, "wb") as f:

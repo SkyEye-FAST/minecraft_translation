@@ -6,7 +6,7 @@ import sys
 from base import lang_list, LANG_DIR
 
 # 检查是否有语言文件缺失
-missing_files = []
+missing_files: list[str] = []
 for lang_code in lang_list:
     lang_file = LANG_DIR / f"{lang_code}.json"
     if not lang_file.exists():
@@ -19,7 +19,7 @@ if missing_files:
     sys.exit()
 
 # 读取语言文件
-language_data = {}
+language_data: dict[str, dict[str, str]] = {}
 for lang_name in lang_list:
     with open(LANG_DIR / f"{lang_name}.json", "r", encoding="utf-8") as f:
         language_data[lang_name] = json.load(f)
