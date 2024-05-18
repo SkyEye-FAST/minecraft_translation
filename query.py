@@ -23,7 +23,7 @@ def print_translations(keys: List[str], languages: List[str]) -> None:
     """
     打印翻译结果。
 
-    参数:
+    Args:
         keys (List[str]): 本地化键名列表。
         languages (List[str]): 语言列表。
     """
@@ -39,7 +39,7 @@ def get_input_choice(prompt: str, choices: List[int]) -> int:
     """
     获取用户输入的有效选项。
 
-    参数:
+    Args:
         prompt (str): 提示信息。
         choices (List[int]): 有效选项列表。
 
@@ -71,7 +71,7 @@ def query_by_source_string(exact_match: bool = True) -> None:
     """
     通过源字符串查询翻译。
 
-    参数:
+    Args:
         exact_match (bool): 是否进行精确匹配。默认值为 True。
     """
     source_str = input("\n源字符串，English (United States)：")

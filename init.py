@@ -12,11 +12,11 @@ def check_missing_files(lang_list: List[str], lang_dir: Path) -> List[str]:
     """
     检查是否有语言文件缺失。
 
-    参数:
+    Args:
         lang_list (List[str]): 语言代码列表。
         lang_dir (Path): 语言文件目录。
 
-    返回:
+    Returns:
         List[str]: 缺失的语言文件列表。
     """
     missing_files = [
@@ -33,11 +33,11 @@ def load_language_files(
     """
     读取语言文件并返回语言数据。
 
-    参数:
+    Args:
         lang_list (List[str]): 语言代码列表。
         lang_dir (Path): 语言文件目录。
 
-    返回:
+    Returns:
         Dict[str, Dict[str, str]]: 语言数据字典。
     """
     lang_data = {}
@@ -56,11 +56,11 @@ def main(lang_list: List[str], lang_dir: Path) -> Dict[str, Dict[str, str]]:
     """
     主函数，执行语言文件检查和加载操作。
 
-    参数:
+    Args:
         lang_list (List[str]): 语言代码列表。
         lang_dir (Path): 语言文件目录。
 
-    返回:
+    Returns:
         Dict[str, Dict[str, str]]: 语言数据字典。
     """
     missing_files = check_missing_files(lang_list, lang_dir)
