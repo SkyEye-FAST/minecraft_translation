@@ -27,6 +27,7 @@ def print_translations(keys: List[str], languages: List[str]) -> None:
         keys (List[str]): 本地化键名列表。
         languages (List[str]): 语言列表。
     """
+
     for key in keys:
         print(f"\n本地化键名：{key}")
         for lang in languages:
@@ -46,6 +47,7 @@ def get_input_choice(prompt: str, choices: List[int]) -> int:
     返回:
         int: 用户选择的有效选项。
     """
+
     while True:
         try:
             choice = int(input(prompt))
@@ -60,6 +62,7 @@ def query_by_key() -> None:
     """
     通过本地化键名查询翻译。
     """
+
     translation_key = input("\n键名：")
     if translation_key in language_data["en_us"]:
         print_translations([translation_key], lang_list)
@@ -74,6 +77,7 @@ def query_by_source_string(exact_match: bool = True) -> None:
     Args:
         exact_match (bool): 是否进行精确匹配。默认值为 True。
     """
+
     source_str = input("\n源字符串，English (United States)：")
     if exact_match:
         query_keys = [k for k, v in language_data["en_us"].items() if v == source_str]
@@ -94,6 +98,7 @@ def query_by_translation() -> None:
     """
     通过翻译后字符串查询翻译。
     """
+
     print("\n请选择语言：")
     language_list = [lang for lang in lang_list if lang != "en_us"]
     for index, lang in enumerate(language_list):
@@ -119,6 +124,7 @@ def main() -> None:
     """
     主函数，提供查询选项并根据用户选择执行相应的查询操作。
     """
+
     print(
         "选择查询方式：\n1. 本地化键名\n2. 源字符串\n3. 源字符串（模糊匹配）\n4. 翻译后字符串（模糊匹配）"
     )

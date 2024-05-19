@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Dict, List
+
 from base import lang_list as base_lang_list, LANG_DIR
 
 
