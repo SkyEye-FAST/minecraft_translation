@@ -1,13 +1,10 @@
-# -*- encoding: utf-8 -*-
-"""Minecraft翻译查询器"""
+"""Minecraft Translation Querier."""
 
-from typing import List, Dict
-
-from base import lang_list
+from base import LANGUAGE_LIST as LANG_LIST
 from init import language_data
 
-# 读取语言文件
-language_names: Dict[str, str] = {
+# Map language codes to human-readable names.
+LANGUAGE_NAMES: dict[str, str] = {
     "en_us": "源字符串，English (United States)",
     "zh_cn": "简体中文 (中国大陆)",
     "zh_hk": "繁體中文 (香港特別行政區)",
@@ -19,35 +16,34 @@ language_names: Dict[str, str] = {
 }
 
 
-def print_translations(keys: List[str], languages: List[str]) -> None:
-    """
-    打印翻译结果。
+def print_translations(keys: list[str], languages: list[str]) -> None:
+    """Print translations for a given list of keys across specified languages.
 
     Args:
-        keys (List[str]): 本地化键名列表。
-        languages (List[str]): 语言列表。
-    """
+        keys (list[str]): A list of localization keys.
+        languages (list[str]): A list of language codes to display.
 
+    """
     for key in keys:
-        print(f"\n本地化键名：{key}")
+        print(f"\nLocalization Key: {key}")
         for lang in languages:
-            translation = language_data[lang].get(key, "不存在")
-            print(f"{language_names[lang]}：{translation}")
+            lang_name = LANGUAGE_NAMES.get(lang, lang)
+            translation = language_data[lang].get(key, "N/A")
+            print(f"{lang_name}: {translation}")
         print()
 
 
-def get_input_choice(prompt: str, choices: List[int]) -> int:
-    """
-    获取用户输入的有效选项。
+def get_user_choice(prompt: str, choices: list[int]) -> int:
+    """Prompts the user for input and validates it against a list of choices.
 
     Args:
-        prompt (str): 提示信息。
-        choices (List[int]): 有效选项列表。
+        prompt (str): The message to display to the user.
+        choices (list[int]): A list of valid integer choices.
 
-    返回:
-        int: 用户选择的有效选项。
+    Returns:
+        int: The user's valid choice.
+
     """
-
     while True:
         try:
             choice = int(input(prompt))
@@ -55,80 +51,72 @@ def get_input_choice(prompt: str, choices: List[int]) -> int:
                 return choice
         except ValueError:
             pass
-        print("无效的输入，请重试。")
+        print("Invalid input. Please try again.")
 
 
 def query_by_key() -> None:
-    """
-    通过本地化键名查询翻译。
-    """
-
-    translation_key = input("\n键名：")
-    if translation_key in language_data["en_us"]:
-        print_translations([translation_key], lang_list)
+    """Query translations by a specific localization key."""
+    translation_key = input("\nEnter localization key: ")
+    if translation_key in language_data.get("en_us", {}):
+        print_translations([translation_key], LANG_LIST)
     else:
-        print("未找到对应的键名，请检查输入。")
+        print("Localization key not found. Please check your input.")
 
 
 def query_by_source_string(exact_match: bool = True) -> None:
-    """
-    通过源字符串查询翻译。
+    """Query for keys by matching the source English string.
 
     Args:
-        exact_match (bool): 是否进行精确匹配。默认值为 True。
+        exact_match (bool): If True, performs an exact match.
+                            If False, performs a case-insensitive substring match.
+
     """
+    source_str = input("\nEnter source string (English): ")
+    en_us_data = language_data.get("en_us", {})
 
-    source_str = input("\n源字符串，English (United States)：")
     if exact_match:
-        query_keys = [k for k, v in language_data["en_us"].items() if v == source_str]
+        found_keys = [k for k, v in en_us_data.items() if v == source_str]
     else:
-        query_keys = [
-            k
-            for k, v in language_data["en_us"].items()
-            if source_str.lower() in v.lower()
-        ]
+        found_keys = [k for k, v in en_us_data.items() if source_str.lower() in v.lower()]
 
-    if query_keys:
-        print_translations(query_keys, lang_list)
+    if found_keys:
+        print_translations(found_keys, LANG_LIST)
     else:
-        print("未找到对应的源字符串，请检查输入。")
+        print("No matching source string found. Please check your input.")
 
 
 def query_by_translation() -> None:
-    """
-    通过翻译后字符串查询翻译。
-    """
+    """Query for keys by matching a substring in a translated string."""
+    print("\nPlease select a language:")
+    # Exclude en_us since we are searching by translation
+    searchable_langs = [lang for lang in LANG_LIST if lang != "en_us"]
+    for i, lang_code in enumerate(searchable_langs, 1):
+        lang_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+        print(f"{i}. {lang_name}")
 
-    print("\n请选择语言：")
-    language_list = [lang for lang in lang_list if lang != "en_us"]
-    for index, lang in enumerate(language_list):
-        print(f"{index + 1}. {lang}：{language_names[lang]}")
+    choice_num = get_user_choice("Enter number: ", list(range(1, len(searchable_langs) + 1)))
+    chosen_lang = searchable_langs[choice_num - 1]
 
-    language_num = get_input_choice(
-        "请输入编号：", list(range(1, len(language_list) + 1))
-    )
-    chosen_language = language_list[language_num - 1]
+    search_term = input(f"\nEnter part of the translated string in {LANGUAGE_NAMES[chosen_lang]}: ")
+    lang_data = language_data.get(chosen_lang, {})
+    found_keys = [k for k, v in lang_data.items() if search_term in v]
 
-    translation = input("\n翻译后字符串的一部分：")
-    query_keys = [
-        k for k, v in language_data[chosen_language].items() if translation in v
-    ]
-
-    if query_keys:
-        print_translations(query_keys, lang_list)
+    if found_keys:
+        print_translations(found_keys, LANG_LIST)
     else:
-        print("未找到对应的翻译后字符串，请检查输入。")
+        print("No matching translation found. Please check your input.")
 
 
 def main() -> None:
-    """
-    主函数，提供查询选项并根据用户选择执行相应的查询操作。
-    """
-
+    """Drive the query interface."""
     print(
-        "选择查询方式：\n1. 本地化键名\n2. 源字符串\n3. 源字符串（模糊匹配）\n4. 翻译后字符串（模糊匹配）"
+        "Select query method:\n"
+        "1. By Localization Key\n"
+        "2. By Source String (Exact Match)\n"
+        "3. By Source String (Fuzzy Match)\n"
+        "4. By Translated String (Fuzzy Match)"
     )
-    method = get_input_choice("请输入编号：", [1, 2, 3, 4])
+    method = get_user_choice("Enter number: ", [1, 2, 3, 4])
 
     if method == 1:
         query_by_key()

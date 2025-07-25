@@ -1,8 +1,10 @@
-# 获取的版本，若为latest则获取最新快照
+# The Minecraft version to be fetched. Use "latest" for the newest snapshot.
 version = "latest"
-# 版本文件夹
+
+# The directory where version-specific files will be stored.
 version_folder = "versions"
-# 语言列表
+
+# The list of languages to be downloaded and processed.
 language_list = [
     "en_us",
     "zh_cn",
@@ -13,7 +15,9 @@ language_list = [
     "ko_kr",
     "vi_vn",
 ]
-# 是否删除下载的client.jar
+
+# Set to true to delete the downloaded client.jar after extracting language files.
 remove_client = true
-# 输出文件夹
+
+# The directory where output files will be saved.
 output_folder = "output"

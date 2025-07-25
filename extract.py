@@ -1,16 +1,12 @@
-# -*- encoding: utf-8 -*-
-"""Minecraft译名提取器"""
+"""Minecraft Translation Extractor."""
 
 import re
 
-from typing import Dict, List, Tuple, Set
-
-from base import OUTPUT_DIR, lang_list
+from base import LANGUAGE_LIST, OUTPUT_DIR
 from init import language_data
 
-
-# 定义常量
-PREFIXES: Tuple[str, ...] = (
+# Prefixes for keys that should generally be included.
+VALID_PREFIXES: tuple[str, ...] = (
     "block.",
     "item.minecraft.",
     "entity.minecraft.",
@@ -22,15 +18,17 @@ PREFIXES: Tuple[str, ...] = (
     "filled_map",
 )
 
-# 定义正则模式
-INVALID_BLOCK_ITEM_ENTITY_PATTERN = re.compile(
+# Matches keys that are intermediate categories and not actual names.
+INVALID_HIERARCHICAL_KEY_PATTERN = re.compile(
     r"(block\.minecraft\.|item\.minecraft\.|entity\.minecraft\.)[^.]*\."
 )
+# Matches specific patterns for item effects that should be included.
 ITEM_EFFECT_PATTERN = re.compile(r"item\.minecraft\.[^.]*\.effect\.[^.]*")
-ADVANCEMENTS_TITLE_PATTERN = re.compile(r"advancements\.(.*)\.title")
+# Matches advancement titles, which are desired.
+ADVANCEMENT_TITLE_PATTERN = re.compile(r"advancements\.(.*)\.title")
 
-# 定义排除项
-EXCLUSIONS: Set[str] = {
+# A set of specific keys to be explicitly excluded from the output.
+EXCLUDED_KEYS: set[str] = {
     "block.minecraft.set_spawn",
     "entity.minecraft.falling_block_type",
     "filled_map.id",
@@ -41,52 +39,61 @@ EXCLUSIONS: Set[str] = {
 }
 
 
-def is_valid_key(translation_key: str) -> bool:
-    """
-    判断是否为有效键名。
+def is_valid_key(key: str) -> bool:
+    """Determine if a localization key is valid for extraction based on a set of rules.
 
     Args:
-        translation_key (str): 需要验证的键名。
+        key (str): The localization key to validate.
 
     Returns:
-        bool: 如果键名有效，返回 True；否则返回 False。
+        bool: True if the key is valid, False otherwise.
+
     """
-
-    if ADVANCEMENTS_TITLE_PATTERN.match(translation_key):
+    # Rule 1: Always include advancement titles.
+    if ADVANCEMENT_TITLE_PATTERN.match(key):
         return True
 
-    if not translation_key.startswith(PREFIXES):
+    # Rule 2: Key must start with one of the valid prefixes.
+    if not key.startswith(VALID_PREFIXES):
         return False
 
-    if translation_key in EXCLUSIONS or "pottery_shard" in translation_key:
+    # Rule 3: Exclude specific keys and pottery shard patterns.
+    if key in EXCLUDED_KEYS or "pottery_shard" in key:
         return False
 
-    if ITEM_EFFECT_PATTERN.match(translation_key):
+    # Rule 4: Always include item effect descriptions that match the pattern.
+    if ITEM_EFFECT_PATTERN.match(key):
         return True
 
-    if INVALID_BLOCK_ITEM_ENTITY_PATTERN.match(translation_key):
+    # Rule 5: Exclude keys that are just containers for other keys (e.g., block.minecraft.banner.)
+    if INVALID_HIERARCHICAL_KEY_PATTERN.match(key):
         return False
 
     return True
 
 
-# 输出文件夹
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-output_data: Dict[str, List[str]] = {
-    name: [v for k, v in data.items() if is_valid_key(k)]
-    for name, data in language_data.items()
+# Filter translations based on valid keys.
+output_translations: dict[str, list[str]] = {
+    lang_code: [value for key, value in data.items() if is_valid_key(key)]
+    for lang_code, data in language_data.items()
 }
 
-output_key_data: List[str] = [
-    k for k in language_data["en_us"].keys() if is_valid_key(k)
-]
+# Filter the keys themselves.
+output_keys: list[str] = [key for key in language_data.get("en_us", {}).keys() if is_valid_key(key)]
 
-for lang_name in lang_list:
-    with open(OUTPUT_DIR / f"{lang_name}.txt", "w", encoding="utf-8") as f:
-        for line in output_data[lang_name]:
-            f.writelines(line + "\n")
+# Write filtered translations to .txt files.
+for lang_name in LANGUAGE_LIST:
+    output_file = OUTPUT_DIR / f"{lang_name}.txt"
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(output_translations.get(lang_name, [])))
+        f.write("\n")  # Add a final newline
 
-with open(OUTPUT_DIR / "key.txt", "w", encoding="utf-8") as f:
-    for line in output_key_data:
-        f.writelines(line + "\n")
+# Write filtered keys to key.txt.
+key_output_file = OUTPUT_DIR / "key.txt"
+with open(key_output_file, "w", encoding="utf-8") as f:
+    f.write("\n".join(output_keys))
+    f.write("\n")  # Add a final newline
+
+print(f"Extraction complete. Files saved in '{OUTPUT_DIR.name}' directory.")

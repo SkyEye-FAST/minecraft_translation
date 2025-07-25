@@ -1,94 +1,121 @@
-# -*- encoding: utf-8 -*-
-"""Minecraft语言文件获取器"""
+"""Minecraft language file downloader."""
 
 import hashlib
 import sys
-from zipfile import ZipFile
 from pathlib import Path
+from zipfile import ZipFile
 
 import requests as r
 
-from base import LANG_DIR, remove_client, lang_list, version_info
+from base import LANG_DIR, LANGUAGE_LIST, REMOVE_CLIENT_JAR, version_info
 
 
-def get_response(url: str):
-    """获取响应"""
+def get_response(url: str) -> r.Response:
+    """Send a GET request to the specified URL and return the response.
+
+    Args:
+        url (str): The URL to request.
+
+    Returns:
+        r.Response: The response object.
+
+    """
     try:
         resp = r.get(url, timeout=60)
         resp.raise_for_status()
         return resp
-    except r.exceptions.RequestException as ex:
-        print(f"请求发生错误: {ex}")
+    except r.exceptions.RequestException as e:
+        print(f"An error occurred during the request: {e}")
         sys.exit()
 
 
-def get_file(url: str, file_name: str, file_path: Path, sha1: str):
-    """下载文件"""
-    for _ in range(3):
+def download_file(url: str, file_name: str, file_path: Path, expected_sha1: str) -> None:
+    """Download a file, verify its SHA1 checksum, and retry on failure.
+
+    Args:
+        url (str): The URL to download from.
+        file_name (str): The name of the file for logging purposes.
+        file_path (Path): The path to save the file.
+        expected_sha1 (str): The expected SHA1 hash of the file.
+
+    """
+    for attempt in range(3):
         with open(file_path, "wb") as f:
             f.write(get_response(url).content)
-        size_in_bytes = file_path.stat().st_size
-        if size_in_bytes > 1048576:
-            size = f"{round(size_in_bytes / 1048576, 2)} MB"
-        else:
-            size = f"{round(size_in_bytes / 1024, 2)} KB"
+
         with open(file_path, "rb") as f:
-            if hashlib.file_digest(f, "sha1").hexdigest() == sha1:
-                print(f"文件SHA1校验一致。文件大小：{size_in_bytes} B（{size}）\n")
-                break
-            print("文件SHA1校验不一致，重新尝试下载。\n")
+            actual_sha1 = hashlib.file_digest(f, "sha1").hexdigest()
+
+        if actual_sha1 == expected_sha1:
+            size_in_bytes = file_path.stat().st_size
+            size_mb = round(size_in_bytes / 1048576, 2)
+            size_kb = round(size_in_bytes / 1024, 2)
+            size_str = f"{size_mb} MB" if size_in_bytes > 1048576 else f"{size_kb} KB"
+            print(f"SHA1 checksum consistent. File size: {size_in_bytes} B ({size_str})\n")
+            return
+
+        print(f"SHA1 checksum mismatch for {file_name}. Retrying (Attempt {attempt + 2}/3).\n")
     else:
-        print(f"无法下载文件“{file_name}”。\n")
+        print(f"Failed to download '{file_name}' correctly after 3 attempts.\n")
+        file_path.unlink()  # Clean up failed download
 
 
-# 存放版本语言文件的文件夹
 LANG_DIR.mkdir(exist_ok=True)
 
-# 获取client.json
+# Fetch client manifest
 client_manifest_url = version_info["url"]
-print(f"正在获取客户端索引文件“{client_manifest_url.rsplit('/', 1)[-1]}”的内容……")
+client_filename = client_manifest_url.rsplit("/", 1)[-1]
+print(f"Fetching client manifest '{client_filename}'...")
 client_manifest = get_response(client_manifest_url).json()
 
-# 获取资产索引文件
+# Fetch asset index
 asset_index_url = client_manifest["assetIndex"]["url"]
-print(f"正在获取资产索引文件“{asset_index_url.rsplit('/', 1)[-1]}”的内容……\n")
+asset_index_filename = asset_index_url.rsplit("/", 1)[-1]
+print(f"Fetching asset index '{asset_index_filename}'...\n")
 asset_index = get_response(asset_index_url).json()["objects"]
 
-# 获取客户端JAR
+# Download client.jar
 client_url = client_manifest["downloads"]["client"]["url"]
 client_sha1 = client_manifest["downloads"]["client"]["sha1"]
 client_path = LANG_DIR / "client.jar"
-print(f"正在下载客户端Java归档“client.jar”（{client_sha1}）……")
-get_file(client_url, "client.jar", client_path, client_sha1)
+print(f"Downloading client archive 'client.jar' ({client_sha1})...")
+download_file(client_url, "client.jar", client_path, client_sha1)
 
-# 解压English (United States)语言文件
-with ZipFile(client_path) as client:
-    with client.open("assets/minecraft/lang/en_us.json") as content:
-        with open(LANG_DIR / "en_us.json", "wb") as en:
-            print("正在从client.jar解压语言文件“en_us.json”……")
-            en.write(content.read())
+# Extract en_us.json from client.jar
+if client_path.exists():
+    with ZipFile(client_path) as client_zip:
+        print("Extracting 'en_us.json' from client.jar...")
+        with (
+            client_zip.open("assets/minecraft/lang/en_us.json") as source,
+            open(LANG_DIR / "en_us.json", "wb") as target,
+        ):
+            target.write(source.read())
 
-# 删除客户端JAR
-if remove_client:
-    print("正在删除client.jar……\n")
+# Clean up client.jar if configured
+if REMOVE_CLIENT_JAR and client_path.exists():
+    print("Removing client.jar...\n")
     client_path.unlink()
 
-# 获取语言文件
-lang_list.remove("en_us")
-language_files_list = [f"{_}.json" for _ in lang_list]
+# Download other specified language files
+if "en_us" in LANGUAGE_LIST:
+    LANGUAGE_LIST.remove("en_us")
 
-for lang in language_files_list:
-    lang_asset = asset_index.get(f"minecraft/lang/{lang}")
+for lang_code in LANGUAGE_LIST:
+    lang_filename = f"{lang_code}.json"
+    lang_asset_key = f"minecraft/lang/{lang_filename}"
+    lang_asset = asset_index.get(lang_asset_key)
+
     if lang_asset:
         file_hash = lang_asset["hash"]
-        print(f"正在下载语言文件“{lang}”（{file_hash}）……")
-        get_file(
-            f"https://resources.download.minecraft.net/{file_hash[:2]}/{file_hash}",
-            lang,
-            LANG_DIR / lang,
+        print(f"Downloading language file '{lang_filename}' ({file_hash})...")
+        download_url = f"https://resources.download.minecraft.net/{file_hash[:2]}/{file_hash}"
+        download_file(
+            download_url,
+            lang_filename,
+            LANG_DIR / lang_filename,
             file_hash,
         )
     else:
-        print(f"{lang}不存在。\n")
+        print(f"Language file '{lang_filename}' not found in asset index.\n")
 
-print("已完成。")
+print("Download process completed.")
