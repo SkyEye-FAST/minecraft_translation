@@ -21,3 +21,6 @@ remove_client = true
 
 # The directory where output files will be saved.
 output_folder = "output"
+
+# The directory where legacy assets will be stored.
+legacy_assets_output_folder = "legacy_assets_output"
